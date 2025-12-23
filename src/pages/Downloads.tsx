@@ -138,10 +138,46 @@ const features = [
   },
 ];
 
-const platforms = [
-  { name: "Windows", versions: "10, 11", arch: "x64 / x86" },
-  { name: "macOS", versions: "12+", arch: "Apple Silicon / Intel" },
-  { name: "Linux", versions: "Ubuntu 20.04+", arch: "x64 / ARM" },
+type Architecture = string;
+type PackageFormat = string;
+
+interface PlatformDownload {
+  name: string;
+  versions: string;
+  architectures: { label: string; value: Architecture }[];
+  formats?: { label: string; value: PackageFormat; arch?: Architecture[] }[];
+}
+
+const platforms: PlatformDownload[] = [
+  {
+    name: "Windows",
+    versions: "10, 11",
+    architectures: [
+      { label: "64-bit", value: "x64" },
+      { label: "32-bit", value: "x86" },
+    ],
+  },
+  {
+    name: "macOS",
+    versions: "12+",
+    architectures: [
+      { label: "Apple Silicon", value: "arm64" },
+      { label: "Intel", value: "x64" },
+    ],
+  },
+  {
+    name: "Linux",
+    versions: "Ubuntu 20.04+, Fedora, Arch",
+    architectures: [
+      { label: "x64", value: "x64" },
+      { label: "ARM64", value: "arm64" },
+    ],
+    formats: [
+      { label: ".deb", value: "deb" },
+      { label: ".rpm", value: "rpm" },
+      { label: ".AppImage", value: "appimage" },
+    ],
+  },
 ];
 
 const resources = [
@@ -149,6 +185,108 @@ const resources = [
   { title: "ReachY Checker", description: "Verify your instances", github: true },
   { title: "ReachY CLI", description: "Manage instances from terminal", github: true },
 ];
+
+const PlatformCard = ({ platform, index }: { platform: PlatformDownload; index: number }) => {
+  const [selectedArch, setSelectedArch] = useState(platform.architectures[0].value);
+  const [selectedFormat, setSelectedFormat] = useState(platform.formats?.[0].value || null);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      viewport={{ once: true }}
+      transition={{ delay: index * 0.05 }}
+      className="group py-8 border-b border-border/30 hover:border-border/60 transition-colors"
+    >
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        {/* Platform info */}
+        <div className="flex items-center gap-8">
+          <span className="text-lg font-medium w-28">{platform.name}</span>
+          <span className="text-sm text-muted-foreground/50">{platform.versions}</span>
+        </div>
+
+        {/* Selectors */}
+        <div className="flex flex-wrap items-center gap-6">
+          {/* Architecture selector */}
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] text-muted-foreground/40 uppercase tracking-wider">Arch</span>
+            <div className="flex bg-muted/30 rounded-md p-0.5">
+              {platform.architectures.map((arch) => (
+                <button
+                  key={arch.value}
+                  onClick={() => setSelectedArch(arch.value)}
+                  className={`px-3 py-1.5 text-xs rounded transition-all ${
+                    selectedArch === arch.value
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground/60 hover:text-muted-foreground"
+                  }`}
+                >
+                  {arch.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Format selector (Linux only) */}
+          {platform.formats && (
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] text-muted-foreground/40 uppercase tracking-wider">Format</span>
+              <div className="flex bg-muted/30 rounded-md p-0.5">
+                {platform.formats.map((format) => (
+                  <button
+                    key={format.value}
+                    onClick={() => setSelectedFormat(format.value)}
+                    className={`px-3 py-1.5 text-xs rounded font-mono transition-all ${
+                      selectedFormat === format.value
+                        ? "bg-background text-foreground shadow-sm"
+                        : "text-muted-foreground/60 hover:text-muted-foreground"
+                    }`}
+                  >
+                    {format.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Download button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="opacity-60 group-hover:opacity-100 transition-opacity"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Download
+          </Button>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+const PlatformsSection = () => (
+  <section id="platforms" className="container mx-auto px-4 py-32 border-t border-border/50">
+    <div className="max-w-4xl mx-auto space-y-16">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="space-y-2"
+      >
+        <h2 className="text-3xl font-medium tracking-tight">All platforms</h2>
+        <p className="text-muted-foreground/70">
+          Choose your architecture and format
+        </p>
+      </motion.div>
+
+      <div className="space-y-1">
+        {platforms.map((platform, i) => (
+          <PlatformCard key={platform.name} platform={platform} index={i} />
+        ))}
+      </div>
+    </div>
+  </section>
+);
 
 const Downloads = () => {
   return (
@@ -186,52 +324,7 @@ const Downloads = () => {
       </section>
 
       {/* Platforms */}
-      <section id="platforms" className="container mx-auto px-4 py-32 border-t border-border/50">
-        <div className="max-w-4xl mx-auto space-y-16">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="space-y-2"
-          >
-            <h2 className="text-3xl font-medium tracking-tight">All platforms</h2>
-            <p className="text-muted-foreground/70">
-              Available for major operating systems
-            </p>
-          </motion.div>
-
-          <div className="space-y-1">
-            {platforms.map((platform, i) => (
-              <motion.div
-                key={platform.name}
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.05 }}
-                className="group flex items-center justify-between py-6 border-b border-border/30 hover:border-border transition-colors cursor-pointer"
-              >
-                <div className="flex items-center gap-8">
-                  <span className="text-lg font-medium w-24">{platform.name}</span>
-                  <span className="text-sm text-muted-foreground/50">{platform.versions}</span>
-                </div>
-                <div className="flex items-center gap-6">
-                  <span className="text-xs text-muted-foreground/40 tracking-wide">
-                    {platform.arch}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <Download className="w-4 h-4 mr-2" />
-                    Download
-                  </Button>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <PlatformsSection />
 
       {/* Resources */}
       <section className="container mx-auto px-4 py-32 border-t border-border/50">
