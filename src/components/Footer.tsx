@@ -28,13 +28,18 @@ const Footer = () => {
             <div key={category}>
               <p className="text-xs font-medium mb-4">{category}</p>
               <ul className="space-y-2">
-                {links.map((link) => (
-                  <li key={link}>
-                    <a href="#" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-                      {link}
-                    </a>
-                  </li>
-                ))}
+                {links.map((link) => {
+                  const href = category === "Legal" 
+                    ? `/legal/${link.toLowerCase()}` 
+                    : "#";
+                  return (
+                    <li key={link}>
+                      <a href={href} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                        {link}
+                      </a>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ))}
