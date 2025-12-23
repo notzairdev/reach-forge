@@ -1,87 +1,67 @@
-import { motion } from "framer-motion";
-import { Shield, Lock, Key } from "lucide-react";
+import { useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 
 const features = [
   {
-    icon: Shield,
-    title: "Data Encryption",
-    description: "Our proprietary ReachC algorithm combines military-grade encryption with unique, unrepeatable keys. Your data remains impenetrable.",
+    title: "Encryption",
+    description: "Military-grade ReachC algorithm with unique, unrepeatable keys.",
   },
   {
-    icon: Lock,
-    title: "No leaks. Everything secure.",
-    description: "RPB protection system blocks unauthorized screenshots and recordings. Your creations stay yours, protected at the system level.",
+    title: "Protection",
+    description: "RPB system blocks unauthorized screenshots and recordings.",
   },
   {
-    icon: Key,
-    title: "You create it. You control it.",
-    description: "Complete ownership over your data and projects. Granular permissions, audit logs, and instant access revocation.",
+    title: "Control",
+    description: "Complete ownership. Granular permissions. Instant revocation.",
   },
 ];
 
-const container = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.15,
-    },
-  },
-};
-
-const item = {
-  hidden: { opacity: 0, y: 30 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-};
-
 const SecuritySection = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start end", "end start"],
+  });
+
+  const opacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0, 1, 1, 0]);
+  const y = useTransform(scrollYProgress, [0, 0.3], [100, 0]);
+
   return (
-    <section className="py-24 lg:py-32 relative">
-      <div className="container px-4">
-        {/* Section header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-16"
+    <section ref={containerRef} className="py-32 lg:py-48 relative">
+      <motion.div style={{ opacity }} className="container px-4">
+        {/* Section label - sticky effect */}
+        <motion.div 
+          style={{ y }}
+          className="mb-20"
         >
-          <span className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-            Security First
-          </span>
-          <h2 className="mt-4 text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
-            Built for paranoid creators
+          <p className="text-xs tracking-widest uppercase text-muted-foreground mb-4">Security</p>
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight max-w-2xl">
+            Built for creators who value their work
           </h2>
-          <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-            We take security seriously. Every layer of Reach is designed with protection in mind.
-          </p>
         </motion.div>
 
-        {/* Features grid */}
-        <motion.div
-          variants={container}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true }}
-          className="grid md:grid-cols-3 gap-6 lg:gap-8"
-        >
+        {/* Features - horizontal on desktop */}
+        <div className="grid md:grid-cols-3 gap-px bg-border/50 rounded-2xl overflow-hidden">
           {features.map((feature, index) => (
             <motion.div
               key={index}
-              variants={item}
-              className="group glow-card rounded-2xl p-8 transition-all duration-300 hover:bg-reach-surface-hover"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.6, delay: index * 0.1 }}
+              className="bg-background p-8 md:p-10 group hover:bg-secondary/30 transition-colors duration-500"
             >
-              <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center mb-6 transition-transform duration-300 group-hover:scale-110">
-                <feature.icon className="w-6 h-6 text-foreground" />
-              </div>
-              <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
-              <p className="text-muted-foreground leading-relaxed">
+              <span className="text-xs text-muted-foreground tracking-widest uppercase mb-6 block">
+                0{index + 1}
+              </span>
+              <h3 className="text-xl font-medium mb-4">{feature.title}</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">
                 {feature.description}
               </p>
             </motion.div>
           ))}
-        </motion.div>
-      </div>
+        </div>
+      </motion.div>
     </section>
   );
 };

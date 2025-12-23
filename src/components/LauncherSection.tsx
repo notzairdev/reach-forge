@@ -1,111 +1,86 @@
-import { motion } from "framer-motion";
-import { ArrowRight, Zap, Cpu, Shield } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 
 const LauncherSection = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start end", "end start"],
+  });
+
+  const imageY = useTransform(scrollYProgress, [0, 1], [100, -100]);
+  const textY = useTransform(scrollYProgress, [0, 1], [50, -50]);
+  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
+
   return (
-    <section className="py-24 lg:py-32 relative overflow-hidden">
-      {/* Background accent */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-reach-surface/50 to-transparent" />
-      
-      <div className="container px-4 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          {/* Code preview */}
-          <motion.div
-            initial={{ opacity: 0, x: -40 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="order-2 lg:order-1"
-          >
-            <div className="glow-card rounded-2xl overflow-hidden shadow-2xl">
+    <section ref={containerRef} className="py-32 lg:py-48 relative overflow-hidden">
+      <motion.div style={{ opacity }} className="container px-4">
+        <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+          {/* Code preview with parallax */}
+          <motion.div style={{ y: imageY }} className="order-2 lg:order-1">
+            <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden">
               {/* Window chrome */}
-              <div className="flex items-center gap-2 px-4 py-3 bg-secondary/50 border-b border-border">
+              <div className="flex items-center gap-2 px-4 py-3 border-b border-border/50">
                 <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-red-500/80" />
-                  <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-                  <div className="w-3 h-3 rounded-full bg-green-500/80" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-muted-foreground/20" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-muted-foreground/20" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-muted-foreground/20" />
                 </div>
-                <span className="ml-4 text-xs text-muted-foreground font-mono">reach-launcher/src/main.rs</span>
+                <span className="ml-4 text-[10px] text-muted-foreground font-mono">main.rs</span>
               </div>
               
-              {/* Code content */}
-              <div className="p-6 font-mono text-sm leading-relaxed overflow-x-auto">
-                <pre className="text-muted-foreground">
-                  <code>
-{`// Reach Launcher - Native Performance
-use reach_core::{Launcher, Config};
-use tokio::runtime::Runtime;
+              {/* Code */}
+              <div className="p-6 font-mono text-xs leading-relaxed text-muted-foreground/80">
+                <pre>
+{`use reach_core::{Launcher, Config};
 
-fn main() -> Result<(), Box<dyn Error>> {
-    let config = Config::load()?;
-    
-    // Initialize with zero-copy memory
-    let launcher = Launcher::new(config)
+fn main() -> Result<()> {
+    let launcher = Launcher::new()
         .with_encryption(ReachC::new())
         .with_protection(RPB::enabled())
         .build()?;
     
-    // Start with blazing fast cold boot
-    Runtime::new()?.block_on(launcher.run())
+    launcher.run()
 }`}
-                  </code>
                 </pre>
-              </div>
-              
-              {/* Disclaimer */}
-              <div className="px-6 py-3 bg-secondary/30 border-t border-border">
-                <p className="text-xs text-muted-foreground">
-                  * Simplified code preview. Actual implementation is proprietary.
-                </p>
               </div>
             </div>
           </motion.div>
 
-          {/* Content */}
-          <motion.div
-            initial={{ opacity: 0, x: 40 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="order-1 lg:order-2 space-y-8"
-          >
+          {/* Content with parallax */}
+          <motion.div style={{ y: textY }} className="order-1 lg:order-2 space-y-8">
             <div>
-              <span className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-                Reach Launcher
-              </span>
-              <h2 className="mt-4 text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
-                Native desktop power
+              <p className="text-xs tracking-widest uppercase text-muted-foreground mb-4">Launcher</p>
+              <h2 className="text-4xl md:text-5xl font-semibold tracking-tight mb-6">
+                Native performance
               </h2>
-              <p className="mt-4 text-lg text-muted-foreground leading-relaxed">
-                Built from the ground up in Rust for maximum performance. No Electron bloat, 
-                no memory leaks—just pure, blazing-fast native code that respects your system.
+              <p className="text-muted-foreground leading-relaxed max-w-md">
+                Built in Rust for maximum speed. No Electron bloat, no memory leaks—pure native code.
               </p>
             </div>
 
-            {/* Feature list */}
             <div className="space-y-4">
               {[
-                { icon: Zap, text: "Sub-50ms cold boot time" },
-                { icon: Cpu, text: "Zero-copy memory architecture" },
-                { icon: Shield, text: "Sandboxed execution environment" },
+                "Sub-50ms cold boot",
+                "Zero-copy memory",
+                "Sandboxed execution",
               ].map((feature, i) => (
-                <div key={i} className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
-                    <feature.icon className="w-5 h-5 text-foreground" />
-                  </div>
-                  <span className="text-foreground">{feature.text}</span>
-                </div>
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1 }}
+                  className="flex items-center gap-3 text-sm"
+                >
+                  <span className="w-1 h-1 rounded-full bg-foreground" />
+                  <span>{feature}</span>
+                </motion.div>
               ))}
             </div>
-
-            <Button variant="outline" className="group">
-              Learn More
-              <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
-            </Button>
           </motion.div>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 };
