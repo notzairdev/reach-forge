@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
+import Downloads from "./pages/Downloads";
 import NotFound from "./pages/NotFound";
 import LegalLayout from "./components/LegalLayout";
 import LegalIndex from "./pages/legal/LegalIndex";
@@ -20,6 +21,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/downloads" element={<Downloads />} />
           <Route path="/legal" element={<LegalLayout />}>
             <Route index element={<LegalIndex />} />
             <Route path="privacy" element={<Privacy />} />
