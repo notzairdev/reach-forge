@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Clock, Download, Lock, ScreenShare, Github, ArrowLeft, Monitor, Apple } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { useState, useEffect, useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { Download, Clock, Lock, Layers, Github, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import BlurText from "@/components/BlurText";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -12,145 +10,111 @@ type OsType = "windows" | "macos" | "linux" | "unknown";
 const detectOS = (): OsType => {
   if (typeof window === "undefined") return "unknown";
   const userAgent = navigator.userAgent.toLowerCase();
-  
   if (userAgent.includes("win")) return "windows";
   if (userAgent.includes("mac")) return "macos";
   if (userAgent.includes("linux")) return "linux";
   return "unknown";
 };
 
+const osConfig = {
+  windows: { label: "Windows", arch: "x64" },
+  macos: { label: "macOS", arch: "Universal" },
+  linux: { label: "Linux", arch: "x64" },
+  unknown: { label: "your system", arch: "" },
+};
+
 const Hero = () => {
-  const [isEnded, setIsEnded] = useState(false);
   const [os, setOs] = useState<OsType>("unknown");
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end start"],
+  });
+
+  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+  const y = useTransform(scrollYProgress, [0, 0.5], [0, 100]);
 
   useEffect(() => {
     setOs(detectOS());
   }, []);
 
-  const getOSTitle = () => {
-    switch (os) {
-      case "windows": return "Download Reach Client for Windows";
-      case "macos": return "Download Reach Client for MacOS";
-      case "linux": return "Download Reach Client for Linux";
-      default: return "Download Reach Client now";
-    }
-  };
-
-  const getOSButton = () => {
-    switch (os) {
-      case "windows": return "Download for Windows";
-      case "macos": return "Download for MacOS";
-      case "linux": return "Download for Linux";
-      default: return "Download now";
-    }
-  };
-
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Subtle gradient orb */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[600px] rounded-full opacity-[0.03] blur-3xl bg-gradient-radial from-foreground to-transparent" />
-      
-      <div className="container relative z-10 px-4 py-32">
-        <div className="max-w-4xl mx-auto text-center space-y-8">
-          {/* Version badge */}
+    <section ref={containerRef} className="relative min-h-screen flex items-center justify-center">
+      {/* Minimal glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-gradient-to-b from-foreground/[0.02] to-transparent blur-3xl" />
+
+      <motion.div style={{ opacity, y }} className="container relative z-10 px-4">
+        <div className="max-w-2xl mx-auto text-center space-y-12">
+          {/* Version */}
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: isEnded ? 1 : 0, y: isEnded ? 0 : 10 }}
-            transition={{ duration: 0.4 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1, delay: 0.2 }}
           >
-            <Badge variant="outline" className="border-border text-sm py-1.5 px-5">
-              The current version is 0.5.0-beta.canary
-            </Badge>
+            <span className="text-[11px] tracking-[0.2em] uppercase text-muted-foreground/60">
+              v0.5.0-beta
+            </span>
           </motion.div>
 
-          {/* Animated title */}
-          <BlurText
-            text={getOSTitle()}
-            delay={200}
-            onAnimationComplete={() => setIsEnded(true)}
-            className="text-5xl md:text-6xl lg:text-7xl"
-          />
+          {/* Title */}
+          <div className="space-y-4">
+            <motion.h1
+              initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="text-5xl md:text-6xl lg:text-7xl font-medium tracking-tight"
+            >
+              Get Reach
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              className="text-lg text-muted-foreground/80 max-w-md mx-auto leading-relaxed"
+            >
+              The launcher that keeps your Minecraft experiences secure, encrypted, and always up to date.
+            </motion.p>
+          </div>
 
-          {/* Description and buttons */}
+          {/* CTA */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: isEnded ? 1 : 0, y: isEnded ? 0 : 20 }}
-            transition={{ duration: 0.5 }}
-            className="space-y-6"
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.7 }}
+            className="flex flex-col items-center gap-4"
           >
-            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Reach Client is a Minecraft launcher that allows you to join
-              public or private events and servers hosted by our clients,
-              keeping your data secure, encrypted, and up to date at all times.
-            </p>
-
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button size="lg" className="h-12 px-8 group">
-                <Download className="w-4 h-4 mr-2" />
-                {getOSButton()}
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="h-12 px-8"
-                onClick={() => {
-                  document.getElementById("downloads")?.scrollIntoView({ behavior: "smooth" });
-                }}
-              >
-                More options
-              </Button>
-            </div>
-          </motion.div>
-
-          {/* App preview card */}
-          <motion.div
-            initial={{ opacity: 0, y: 40, scale: 0.95 }}
-            animate={{ opacity: isEnded ? 1 : 0, y: isEnded ? 0 : 40, scale: isEnded ? 1 : 0.95 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="pt-12 hidden md:block"
-          >
-            <div className="relative mx-auto max-w-2xl">
-              <div className="w-full rounded-2xl border border-border bg-card/50 backdrop-blur-sm p-8 shadow-2xl">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="flex gap-2">
-                    <div className="w-3 h-3 rounded-full bg-red-500/80" />
-                    <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-                    <div className="w-3 h-3 rounded-full bg-green-500/80" />
-                  </div>
-                  <span className="text-xs text-muted-foreground ml-2">Reach Client</span>
-                </div>
-                <div className="grid grid-cols-3 gap-4 text-center">
-                  {[
-                    { label: "Active Users", value: "2.4K+" },
-                    { label: "Uptime", value: "99.9%" },
-                    { label: "Experiences", value: "156" },
-                  ].map((stat, i) => (
-                    <div key={i} className="p-4 rounded-xl bg-secondary/50">
-                      <p className="text-2xl font-semibold">{stat.value}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+            <Button size="lg" className="h-14 px-10 text-base group">
+              <Download className="w-4 h-4 mr-3 transition-transform group-hover:-translate-y-0.5" />
+              Download for {osConfig[os].label}
+              {osConfig[os].arch && (
+                <span className="ml-2 text-primary-foreground/60 text-sm">
+                  {osConfig[os].arch}
+                </span>
+              )}
+            </Button>
+            <button
+              onClick={() => document.getElementById("platforms")?.scrollIntoView({ behavior: "smooth" })}
+              className="text-sm text-muted-foreground/50 hover:text-muted-foreground transition-colors flex items-center gap-1"
+            >
+              Other platforms
+              <ChevronDown className="w-3 h-3" />
+            </button>
           </motion.div>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Scroll indicator */}
-      <motion.div 
+      {/* Scroll hint */}
+      <motion.div
         initial={{ opacity: 0 }}
-        animate={{ opacity: isEnded ? 1 : 0 }}
-        transition={{ delay: 0.5 }}
-        className="absolute bottom-12 left-1/2 -translate-x-1/2"
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.2 }}
+        className="absolute bottom-16 left-1/2 -translate-x-1/2"
       >
         <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-          className="w-5 h-8 rounded-full border border-border/50 flex items-start justify-center p-1.5"
-        >
-          <motion.div className="w-1 h-1 rounded-full bg-muted-foreground" />
-        </motion.div>
+          animate={{ y: [0, 6, 0] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          className="w-px h-12 bg-gradient-to-b from-transparent via-muted-foreground/20 to-transparent"
+        />
       </motion.div>
     </section>
   );
@@ -159,58 +123,31 @@ const Hero = () => {
 const features = [
   {
     icon: Clock,
-    title: "Files always up to date",
-    description: "Reach Launcher is always up to date with the latest version of Minecraft clients from official sources. It also keeps experience packs secure from end to end.",
+    title: "Always current",
+    description: "Automatic updates from official sources. Experience packs stay secure end-to-end.",
   },
   {
     icon: Lock,
-    title: "Encrypted data",
-    description: "Reach Client encrypts your data to keep it safe from prying eyes. It uses unique encryption methods designed by the Reach Team to keep everything in order for both users and developers.",
+    title: "Encrypted",
+    description: "Your data is protected with unique encryption designed by the Reach team.",
   },
   {
-    icon: ScreenShare,
-    title: "Game Overlay",
-    description: "Reach Client builds a game overlay that allows you to see relevant information about the organizations behind the experience you are playing, global and unique achievements per experience, and other important information while you play.",
+    icon: Layers,
+    title: "Game overlay",
+    description: "View achievements, organization info, and more while you play.",
   },
 ];
 
 const platforms = [
-  {
-    name: "Windows",
-    icon: Monitor,
-    badge: "x86 - x64",
-    description: "The Reach Client is available for Windows 10 and Windows 11.",
-  },
-  {
-    name: "Linux",
-    icon: Monitor,
-    badge: "x86 - x64 - ARM",
-    description: "The Reach Client is available for Linux or another Unix-like operating system.",
-  },
-  {
-    name: "MacOS",
-    icon: Apple,
-    badge: "Apple Silicon or Intel",
-    description: "The Reach Client is available for MacOS with Intel or Apple Silicon.",
-  },
+  { name: "Windows", versions: "10, 11", arch: "x64 / x86" },
+  { name: "macOS", versions: "12+", arch: "Apple Silicon / Intel" },
+  { name: "Linux", versions: "Ubuntu 20.04+", arch: "x64 / ARM" },
 ];
 
 const resources = [
-  {
-    title: "Minecraft Instance Template",
-    description: "Download a Minecraft instance template to start your own instance.",
-    hasGithub: false,
-  },
-  {
-    title: "ReachY Checker",
-    description: "Verify your Minecraft instances with the ReachY Checker.",
-    hasGithub: true,
-  },
-  {
-    title: "ReachY",
-    description: "The ReachY is a tool to manage your Minecraft instances.",
-    hasGithub: true,
-  },
+  { title: "Instance Template", description: "Start your own Minecraft instance", github: false },
+  { title: "ReachY Checker", description: "Verify your instances", github: true },
+  { title: "ReachY CLI", description: "Manage instances from terminal", github: true },
 ];
 
 const Downloads = () => {
@@ -219,143 +156,131 @@ const Downloads = () => {
       <Navbar />
       <Hero />
 
-      {/* Features Section */}
-      <section className="container mx-auto px-4 py-24 lg:py-32 space-y-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="space-y-4"
-        >
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight">Features</h2>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl">
-            Reach Client has defining features, and the Reach team develops new
-            skills for the Minecraft launcher every day. Learn about some of them.
-          </p>
-        </motion.div>
-
-        <div className="grid md:grid-cols-3 gap-6">
-          {features.map((feature, i) => (
-            <motion.div
-              key={feature.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="border border-border bg-card/50 p-8 rounded-2xl space-y-4 hover:bg-card/80 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <feature.icon className="w-5 h-5 text-foreground" />
-                <h3 className="text-xl font-medium">{feature.title}</h3>
-              </div>
-              <p className="text-muted-foreground leading-relaxed">
-                {feature.description}
-              </p>
-            </motion.div>
-          ))}
+      {/* Features */}
+      <section className="container mx-auto px-4 py-32">
+        <div className="max-w-4xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="grid md:grid-cols-3 gap-12"
+          >
+            {features.map((feature, i) => (
+              <motion.div
+                key={feature.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="space-y-3"
+              >
+                <feature.icon className="w-5 h-5 text-muted-foreground/60" strokeWidth={1.5} />
+                <h3 className="text-sm font-medium">{feature.title}</h3>
+                <p className="text-sm text-muted-foreground/70 leading-relaxed">
+                  {feature.description}
+                </p>
+              </motion.div>
+            ))}
+          </motion.div>
         </div>
       </section>
 
-      {/* Download Platforms Section */}
-      <section id="downloads" className="container mx-auto px-4 py-24 lg:py-32 space-y-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="space-y-4"
-        >
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight">
-            Download the Reach Client for your operating system.
-          </h2>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl">
-            The Reach Client is available for the following operating systems:
-          </p>
-        </motion.div>
+      {/* Platforms */}
+      <section id="platforms" className="container mx-auto px-4 py-32 border-t border-border/50">
+        <div className="max-w-4xl mx-auto space-y-16">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="space-y-2"
+          >
+            <h2 className="text-3xl font-medium tracking-tight">All platforms</h2>
+            <p className="text-muted-foreground/70">
+              Available for major operating systems
+            </p>
+          </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-8">
-          {platforms.map((platform, i) => (
-            <motion.div
-              key={platform.name}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="space-y-4"
-            >
-              <div className="flex items-center gap-3">
-                <platform.icon className="w-6 h-6" />
-                <h3 className="text-2xl font-medium">{platform.name}</h3>
-                <Badge variant="outline" className="ml-auto border-border text-xs py-1 px-3">
-                  {platform.badge}
-                </Badge>
-              </div>
-              <p className="text-muted-foreground">
-                {platform.description}
-              </p>
-              <Button className="w-full">
-                <Download className="w-4 h-4 mr-2" />
-                Download for {platform.name}
-              </Button>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      {/* Separator */}
-      <div className="container mx-auto px-4">
-        <div className="h-px bg-border" />
-      </div>
-
-      {/* More Resources Section */}
-      <section className="container mx-auto px-4 py-24 lg:py-32 space-y-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="space-y-4"
-        >
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight">More resources</h2>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl">
-            Here you can find more resources about the Reach Infrastructure.
-          </p>
-        </motion.div>
-
-        <div className="grid md:grid-cols-3 gap-8">
-          {resources.map((resource, i) => (
-            <motion.div
-              key={resource.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="space-y-4"
-            >
-              <h3 className="text-xl font-medium">{resource.title}</h3>
-              <p className="text-muted-foreground">
-                {resource.description}
-              </p>
-              {resource.hasGithub ? (
-                <div className="flex gap-3">
-                  <Button className="flex-1">
+          <div className="space-y-1">
+            {platforms.map((platform, i) => (
+              <motion.div
+                key={platform.name}
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.05 }}
+                className="group flex items-center justify-between py-6 border-b border-border/30 hover:border-border transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-8">
+                  <span className="text-lg font-medium w-24">{platform.name}</span>
+                  <span className="text-sm text-muted-foreground/50">{platform.versions}</span>
+                </div>
+                <div className="flex items-center gap-6">
+                  <span className="text-xs text-muted-foreground/40 tracking-wide">
+                    {platform.arch}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
                     <Download className="w-4 h-4 mr-2" />
                     Download
                   </Button>
-                  <Button variant="outline" className="flex-1">
-                    <Github className="w-4 h-4 mr-2" />
-                    View on GitHub
-                  </Button>
                 </div>
-              ) : (
-                <Button className="w-full">
-                  <Download className="w-4 h-4 mr-2" />
-                  Download
-                </Button>
-              )}
-            </motion.div>
-          ))}
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Resources */}
+      <section className="container mx-auto px-4 py-32 border-t border-border/50">
+        <div className="max-w-4xl mx-auto space-y-16">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="space-y-2"
+          >
+            <h2 className="text-3xl font-medium tracking-tight">Resources</h2>
+            <p className="text-muted-foreground/70">
+              Tools and templates for developers
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {resources.map((resource, i) => (
+              <motion.div
+                key={resource.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="group p-6 rounded-xl border border-border/30 hover:border-border/60 hover:bg-card/30 transition-all cursor-pointer"
+              >
+                <div className="space-y-3">
+                  <h3 className="text-sm font-medium group-hover:text-foreground transition-colors">
+                    {resource.title}
+                  </h3>
+                  <p className="text-xs text-muted-foreground/60 leading-relaxed">
+                    {resource.description}
+                  </p>
+                  <div className="flex items-center gap-3 pt-2">
+                    <span className="text-xs text-muted-foreground/40 group-hover:text-muted-foreground/60 transition-colors flex items-center gap-1">
+                      <Download className="w-3 h-3" />
+                      Download
+                    </span>
+                    {resource.github && (
+                      <span className="text-xs text-muted-foreground/40 group-hover:text-muted-foreground/60 transition-colors flex items-center gap-1">
+                        <Github className="w-3 h-3" />
+                        Source
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
