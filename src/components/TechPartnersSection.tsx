@@ -1,62 +1,45 @@
-import { motion } from "framer-motion";
+import { useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 
-const partners = [
-  { name: "Cloudflare", logo: "☁️" },
-  { name: "Vercel", logo: "▲" },
-  { name: "Oracle", logo: "◈" },
-  { name: "Microsoft Azure", logo: "⬡" },
-  { name: "Rust", logo: "🦀" },
-  { name: "Polar", logo: "❄️" },
-];
+const partners = ["Cloudflare", "Vercel", "Oracle", "Azure", "Rust", "Polar"];
 
 const TechPartnersSection = () => {
-  return (
-    <section className="py-24 lg:py-32 relative">
-      <div className="container px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-16"
-        >
-          <span className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-            Powered By
-          </span>
-          <h2 className="mt-4 text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
-            Enterprise-grade stack
-          </h2>
-          <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-            Built on the same technologies trusted by the world's largest companies.
-          </p>
-        </motion.div>
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start end", "end start"],
+  });
 
-        <motion.div
+  const x = useTransform(scrollYProgress, [0, 1], [0, -100]);
+  const opacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0, 1, 1, 0]);
+
+  return (
+    <section ref={containerRef} className="py-32 relative overflow-hidden">
+      <motion.div style={{ opacity }} className="container px-4">
+        <motion.p 
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6"
+          className="text-xs tracking-widest uppercase text-muted-foreground text-center mb-12"
         >
+          Powered by
+        </motion.p>
+
+        <motion.div style={{ x }} className="flex items-center justify-center gap-12 lg:gap-16 flex-wrap">
           {partners.map((partner, index) => (
-            <motion.div
+            <motion.span
               key={index}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: index * 0.1 }}
-              className="group glow-card rounded-xl p-6 flex flex-col items-center justify-center gap-3 transition-all duration-300 hover:bg-reach-surface-hover"
+              transition={{ delay: index * 0.05 }}
+              className="text-lg md:text-xl font-medium text-muted-foreground/50 hover:text-muted-foreground transition-colors cursor-default"
             >
-              <span className="text-3xl transition-transform duration-300 group-hover:scale-110">
-                {partner.logo}
-              </span>
-              <span className="text-sm text-muted-foreground font-medium">
-                {partner.name}
-              </span>
-            </motion.div>
+              {partner}
+            </motion.span>
           ))}
         </motion.div>
-      </div>
+      </motion.div>
     </section>
   );
 };

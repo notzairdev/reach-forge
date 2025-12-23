@@ -1,51 +1,58 @@
-import { motion } from "framer-motion";
-import { ArrowRight, Rocket } from "lucide-react";
+import { useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const CTASection = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start end", "end start"],
+  });
+
+  const y = useTransform(scrollYProgress, [0, 1], [50, -50]);
+  const opacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0, 1, 1, 0.5]);
+
   return (
-    <section className="py-24 lg:py-32 relative overflow-hidden">
-      {/* Background glow */}
-      <div className="absolute inset-0 bg-gradient-to-t from-reach-surface via-transparent to-transparent" />
-      <div className="absolute inset-0 hero-glow opacity-50" />
-      
-      <div className="container px-4 relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="max-w-3xl mx-auto text-center space-y-8"
-        >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-secondary/50">
-            <Rocket className="w-4 h-4" />
-            <span className="text-sm font-medium">Ready to launch?</span>
-          </div>
+    <section ref={containerRef} className="py-32 lg:py-48 relative">
+      <motion.div style={{ opacity, y }} className="container px-4">
+        <div className="max-w-2xl mx-auto text-center space-y-8">
+          <motion.h2 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight"
+          >
+            Ready to build?
+          </motion.h2>
           
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
-            Start building with Reach today
-          </h2>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="text-muted-foreground max-w-md mx-auto"
+          >
+            Get started in minutes. Free tier included.
+          </motion.p>
           
-          <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-            Join thousands of Minecraft creators who trust Reach for their infrastructure. 
-            Get started in minutes with our free tier.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button size="lg" className="group">
-              Get Started Free
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-4"
+          >
+            <Button size="lg" className="h-12 px-8 group">
+              Get Started
               <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
             </Button>
-            <Button size="lg" variant="outline">
-              Schedule a Demo
+            <Button size="lg" variant="ghost" className="h-12 px-8 text-muted-foreground">
+              Contact sales
             </Button>
-          </div>
-          
-          <p className="text-sm text-muted-foreground">
-            No credit card required • Free tier included • Cancel anytime
-          </p>
-        </motion.div>
-      </div>
+          </motion.div>
+        </div>
+      </motion.div>
     </section>
   );
 };
