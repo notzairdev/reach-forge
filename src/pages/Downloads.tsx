@@ -189,6 +189,7 @@ const resources = [
 const PlatformCard = ({ platform, index }: { platform: PlatformDownload; index: number }) => {
   const [selectedArch, setSelectedArch] = useState(platform.architectures[0].value);
   const [selectedFormat, setSelectedFormat] = useState(platform.formats?.[0].value || null);
+  const hasFormats = !!platform.formats;
 
   return (
     <motion.div
@@ -198,24 +199,36 @@ const PlatformCard = ({ platform, index }: { platform: PlatformDownload; index: 
       transition={{ delay: index * 0.05 }}
       className="group py-8 border-b border-border/30 hover:border-border/60 transition-colors"
     >
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        {/* Platform info */}
-        <div className="flex items-center gap-8">
-          <span className="text-lg font-medium w-28">{platform.name}</span>
-          <span className="text-sm text-muted-foreground/50">{platform.versions}</span>
+      <div className={`flex flex-col gap-6 ${hasFormats ? '' : 'md:flex-row md:items-center md:justify-between'}`}>
+        {/* Platform info + download (first row) */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-8">
+            <span className="text-lg font-medium w-28">{platform.name}</span>
+            <span className="text-sm text-muted-foreground/50 hidden sm:inline">{platform.versions}</span>
+          </div>
+          
+          {/* Download button - always visible on first row */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="opacity-60 group-hover:opacity-100 transition-opacity"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Download
+          </Button>
         </div>
 
-        {/* Selectors */}
-        <div className="flex flex-wrap items-center gap-6">
+        {/* Selectors row */}
+        <div className="flex flex-wrap items-center gap-4 md:gap-6">
           {/* Architecture selector */}
           <div className="flex items-center gap-2">
-            <span className="text-[11px] text-muted-foreground/40 uppercase tracking-wider">Arch</span>
+            <span className="text-[11px] text-muted-foreground/40 uppercase tracking-wider shrink-0">Arch</span>
             <div className="flex bg-muted/30 rounded-md p-0.5">
               {platform.architectures.map((arch) => (
                 <button
                   key={arch.value}
                   onClick={() => setSelectedArch(arch.value)}
-                  className={`px-3 py-1.5 text-xs rounded transition-all ${
+                  className={`px-3 py-1.5 text-xs rounded transition-all whitespace-nowrap ${
                     selectedArch === arch.value
                       ? "bg-background text-foreground shadow-sm"
                       : "text-muted-foreground/60 hover:text-muted-foreground"
@@ -230,7 +243,7 @@ const PlatformCard = ({ platform, index }: { platform: PlatformDownload; index: 
           {/* Format selector (Linux only) */}
           {platform.formats && (
             <div className="flex items-center gap-2">
-              <span className="text-[11px] text-muted-foreground/40 uppercase tracking-wider">Format</span>
+              <span className="text-[11px] text-muted-foreground/40 uppercase tracking-wider shrink-0">Format</span>
               <div className="flex bg-muted/30 rounded-md p-0.5">
                 {platform.formats.map((format) => (
                   <button
@@ -248,16 +261,6 @@ const PlatformCard = ({ platform, index }: { platform: PlatformDownload; index: 
               </div>
             </div>
           )}
-
-          {/* Download button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="opacity-60 group-hover:opacity-100 transition-opacity"
-          >
-            <Download className="w-4 h-4 mr-2" />
-            Download
-          </Button>
         </div>
       </div>
     </motion.div>
