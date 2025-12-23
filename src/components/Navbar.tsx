@@ -15,7 +15,7 @@ const Navbar = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      setIsScrolled(window.scrollY > 100);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -23,87 +23,111 @@ const Navbar = () => {
 
   return (
     <>
+      {/* Floating Pill Navbar */}
       <motion.nav
-        initial={{ y: -20, opacity: 0 }}
+        initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6 }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          isScrolled 
-            ? 'bg-background/80 backdrop-blur-xl border-b border-border/50' 
-            : 'bg-transparent'
-        }`}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        className="fixed top-6 left-1/2 -translate-x-1/2 z-50"
       >
-        <div className="container px-4">
-          <div className="flex items-center justify-between h-14">
-            {/* Logo */}
-            <a href="/" className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded bg-foreground flex items-center justify-center">
-                <span className="text-background text-xs font-medium">R</span>
-              </div>
-              <span className="font-medium text-sm">Reach</span>
-            </a>
-
-            {/* Desktop nav */}
-            <div className="hidden md:flex items-center gap-8">
-              {navLinks.map((link) => (
-                <a
-                  key={link.name}
-                  href={link.href}
-                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  {link.name}
-                </a>
-              ))}
+        <motion.div
+          animate={{
+            backgroundColor: isScrolled ? "hsl(var(--background) / 0.8)" : "hsl(var(--background) / 0.4)",
+            backdropFilter: isScrolled ? "blur(20px)" : "blur(12px)",
+          }}
+          transition={{ duration: 0.4 }}
+          className="flex items-center gap-1 px-2 py-2 rounded-full border border-border/50 shadow-lg shadow-black/5"
+        >
+          {/* Logo */}
+          <a href="/" className="flex items-center gap-2 px-3">
+            <div className="w-6 h-6 rounded-md bg-foreground flex items-center justify-center">
+              <span className="text-background text-xs font-semibold">R</span>
             </div>
+            <span className="font-medium text-sm hidden sm:block">Reach</span>
+          </a>
 
-            {/* Desktop CTA */}
-            <div className="hidden md:flex items-center gap-3">
-              <Button variant="ghost" size="sm" className="text-xs h-8">
-                Sign in
-              </Button>
-              <Button size="sm" className="text-xs h-8">
-                Get started
-              </Button>
-            </div>
-
-            {/* Mobile menu button */}
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 text-muted-foreground hover:text-foreground"
-            >
-              {isMobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
-            </button>
+          {/* Desktop Links */}
+          <div className="hidden md:flex items-center">
+            {navLinks.map((link) => (
+              <a
+                key={link.name}
+                href={link.href}
+                className="px-4 py-2 text-xs text-muted-foreground hover:text-foreground transition-colors rounded-full hover:bg-muted/50"
+              >
+                {link.name}
+              </a>
+            ))}
           </div>
-        </div>
+
+          {/* Separator */}
+          <div className="hidden md:block w-px h-4 bg-border/50 mx-1" />
+
+          {/* Desktop CTAs */}
+          <div className="hidden md:flex items-center gap-1">
+            <Button variant="ghost" size="sm" className="text-xs h-8 rounded-full px-4">
+              Sign in
+            </Button>
+            <Button size="sm" className="text-xs h-8 rounded-full px-4">
+              Get started
+            </Button>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="md:hidden p-2 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted/50 transition-colors"
+          >
+            {isMobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+          </button>
+        </motion.div>
       </motion.nav>
 
-      {/* Mobile menu */}
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed top-24 left-4 right-4 z-40 md:hidden"
+          >
+            <div className="bg-background/95 backdrop-blur-xl border border-border/50 rounded-2xl p-6 shadow-xl">
+              <div className="space-y-1">
+                {navLinks.map((link) => (
+                  <a
+                    key={link.name}
+                    href={link.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="block px-4 py-3 text-sm font-medium rounded-xl hover:bg-muted/50 transition-colors"
+                  >
+                    {link.name}
+                  </a>
+                ))}
+              </div>
+              <div className="mt-4 pt-4 border-t border-border/50 space-y-2">
+                <Button variant="ghost" className="w-full justify-center rounded-xl">
+                  Sign in
+                </Button>
+                <Button className="w-full justify-center rounded-xl">
+                  Get started
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Overlay */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 md:hidden bg-background pt-14"
-          >
-            <div className="container px-4 py-8 space-y-6">
-              {navLinks.map((link) => (
-                <a
-                  key={link.name}
-                  href={link.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="block text-2xl font-medium"
-                >
-                  {link.name}
-                </a>
-              ))}
-              <div className="pt-6 space-y-3">
-                <Button variant="outline" className="w-full">Sign in</Button>
-                <Button className="w-full">Get started</Button>
-              </div>
-            </div>
-          </motion.div>
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="fixed inset-0 z-30 bg-background/50 backdrop-blur-sm md:hidden"
+          />
         )}
       </AnimatePresence>
     </>
